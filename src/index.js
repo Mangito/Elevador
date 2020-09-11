@@ -28,6 +28,7 @@ let gameOverText;
 let exemploNPC = {
   pisoAtual: numeroAleatorio(4),
   objetivo: numeroAleatorio(4),
+  noElevador: false
 };
 
 let textPiso;
@@ -61,9 +62,9 @@ function create() {
 
   exemploNPC.sprite = this.add.image(possiveisXPosicoesNPC[0], possiveisYAparicoesNPC[exemploNPC.pisoAtual], "npc");
 
-  // textPiso = this.add.text(0, 0, exemploNPC.pisoAtual, style);
-  // textPiso.x = Math.floor(exemploNPC.sprite.x + exemploNPC.sprite.width / 2);
-  // textPiso.y = Math.floor(exemploNPC.sprite.y + exemploNPC.sprite.height / 2);
+  textPiso = this.add.text(0, 0, exemploNPC.objetivo, style);
+  textPiso.x = Math.floor(exemploNPC.sprite.x - exemploNPC.sprite.width / 2);
+  textPiso.y = Math.floor(exemploNPC.sprite.y - exemploNPC.sprite.height / 2);
 }
 
 function update() {
@@ -76,6 +77,7 @@ function update() {
   // }
 
   animacaoElevador();
+  animacaoNPCElevador();
 }
 
 let createNPC = setInterval(() => {
@@ -96,17 +98,18 @@ let createNPC = setInterval(() => {
   //   if (npcsPisos[i].pisoAtual === npc.pisoAtual) criarNovoNPC = false;
   // }
   // if (criarNovoNPC) npcsPisos.push(npc);
-  exemploNPC = npc;
-}, 2500);
+  exemploNPC.pisoAtual = npc.pisoAtual;
+  exemploNPC.objetivo = npc.objetivo;
+}, 2000);
 
 document.addEventListener("keydown", (e) => moverJogador(e));
 function moverJogador(e) {
   const keyCode = e.keyCode;
   let novoPiso = 0;
   if (keyCode === 48) novoPiso = 0;
-  else if (keyCode === 49) novoPiso = 1;
-  else if (keyCode === 50) novoPiso = 2;
-  else if (keyCode === 51) novoPiso = 3;
+  if (keyCode === 49) novoPiso = 1;
+  if (keyCode === 50) novoPiso = 2;
+  if (keyCode === 51) novoPiso = 3;
 
   if (jogador.piso !== novoPiso) jogador.novoPiso = novoPiso;
 }
@@ -117,5 +120,20 @@ function animacaoElevador() {
     if (jogador.sprite.y > pisosElevadorY[novoPiso]) jogador.sprite.y--;
     if (jogador.sprite.y < pisosElevadorY[novoPiso]) jogador.sprite.y++;
     if (jogador.sprite.y === pisosElevadorY[novoPiso]) jogador.piso = novoPiso;
+  }
+}
+
+function animacaoNPCElevador() {
+  if (jogador.piso === exemploNPC.pisoAtual) {
+    exemploNPC.noElevador = true;
+    exemploNPC.sprite.x = jogador.sprite.x;
+  }
+  if (exemploNPC.noElevador) exemploNPC.sprite.y = jogador.sprite.y;
+  if (jogador.piso === exemploNPC.objetivo) {
+    exemploNPC.noElevador = false;
+    exemploNPC.sprite.x++;
+    if (exemploNPC.sprite.x > 400) {
+      exemploNPC.sprite.destroy();
+    }
   }
 }
