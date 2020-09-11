@@ -13,15 +13,24 @@ const config = {
 };
 const game = new Phaser.Game(config);
 
+const style = { font: "bold 32px monospace", fill: "#f0f", boundsAlignH: "center", boundsAlignV: "middle" };
 const possiveisYAparicoesNPC = [619, 459, 299, 139];
 const possiveisXPosicoesNPC = [124, 88, 52, 16];
 const pisosElevadorY = [560, 400, 240, 80];
-let npcsPisos = [[], [], [], []];
-let elevador = {
+let npcsPisos = [];
+let jogador = {
   piso: 0,
-  lugares: []
+  novoPiso: 0,
+  ocupado: false
 };
 let gameOverText;
+
+let exemploNPC = {
+  pisoAtual: numeroAleatorio(4),
+  objetivo: numeroAleatorio(4),
+};
+
+let textPiso;
 
 
 function preload() {
@@ -41,22 +50,32 @@ function create() {
   this.add.image(200, 480, "linha");
   this.add.image(200, 640, "linha");
 
-  const style = { font: "bold 32px monospace", fill: "#f0f", boundsAlignH: "center", boundsAlignV: "middle" };
   this.add.text(365, 485, "0", style);
   this.add.text(365, 325, "1", style);
   this.add.text(365, 165, "2", style);
   this.add.text(365, 5, "3", style);
-  gameOverText = this.add.text(200, 320, "Game Over", style);
+  // gameOverText = this.add.text(200, 320, "Game Over", style);
 
-  let elevador = this.add.image(250, pisosElevadorY[0], "elevador");
+  jogador.sprite = this.add.image(250, pisosElevadorY[0], "elevador");
+
+
+  exemploNPC.sprite = this.add.image(possiveisXPosicoesNPC[0], possiveisYAparicoesNPC[exemploNPC.pisoAtual], "npc");
+
+  // textPiso = this.add.text(0, 0, exemploNPC.pisoAtual, style);
+  // textPiso.x = Math.floor(exemploNPC.sprite.x + exemploNPC.sprite.width / 2);
+  // textPiso.y = Math.floor(exemploNPC.sprite.y + exemploNPC.sprite.height / 2);
 }
 
 function update() {
-  for (let i = 0; i < npcsPisos.length; i++) {
-    for (let j = 0; j < npcsPisos[i].length; j++) {
-      this.add.image(possiveisXPosicoesNPC[j], possiveisYAparicoesNPC[i], "npc");
-    }
-  }
+  // for (let i = 0; i < npcsPisos.length; i++) {
+  //   this.add.image(possiveisXPosicoesNPC[0], possiveisYAparicoesNPC[i], "npc");
+
+  //   this.textPiso.x = Math.floor(npcsPisos[i].x + npcsPisos[i].width / 2);
+  //   this.textPiso.y = Math.floor(npcsPisos[i].y + npcsPisos[i].height / 2);
+  //   this.textPiso.setText(npcsPisos[i]);
+  // }
+
+  animacaoElevador();
 }
 
 let createNPC = setInterval(() => {
@@ -72,19 +91,31 @@ let createNPC = setInterval(() => {
     };
   } while (npc.objetivo === npc.pisoAtual);
 
-  npcsPisos[npc.pisoAtual].push(npc);
-
-  if (npcsPisos[npc.pisoAtual].length > 4) {
-    console.log("Game Over");
-    clearTimeout(createNPC);
-  }
+  // let criarNovoNPC = true;
+  // for (let i = 0; i < npcsPisos.length; i++) {
+  //   if (npcsPisos[i].pisoAtual === npc.pisoAtual) criarNovoNPC = false;
+  // }
+  // if (criarNovoNPC) npcsPisos.push(npc);
+  exemploNPC = npc;
 }, 2500);
 
 document.addEventListener("keydown", (e) => moverJogador(e));
 function moverJogador(e) {
   const keyCode = e.keyCode;
-  if (keyCode === 48) console.log("0");
-  if (keyCode === 49) console.log("1");
-  if (keyCode === 50) console.log("2");
-  if (keyCode === 51) console.log("3");
+  let novoPiso = 0;
+  if (keyCode === 48) novoPiso = 0;
+  else if (keyCode === 49) novoPiso = 1;
+  else if (keyCode === 50) novoPiso = 2;
+  else if (keyCode === 51) novoPiso = 3;
+
+  if (jogador.piso !== novoPiso) jogador.novoPiso = novoPiso;
+}
+
+function animacaoElevador() {
+  const { piso, novoPiso } = jogador;
+  if (piso !== novoPiso) {
+    if (jogador.sprite.y > pisosElevadorY[novoPiso]) jogador.sprite.y--;
+    if (jogador.sprite.y < pisosElevadorY[novoPiso]) jogador.sprite.y++;
+    if (jogador.sprite.y === pisosElevadorY[novoPiso]) jogador.piso = novoPiso;
+  }
 }
