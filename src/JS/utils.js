@@ -1,0 +1,1 @@
+export function numeroAleatorio(n) { return Math.floor(Math.random() * n); }
